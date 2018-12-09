@@ -5,7 +5,7 @@ pg_ctl status
 
 echo "Copying csv files ... "
 sleep 1
-cp ../data/*.csv /tmp/$USER/myDB/data/.
+cp ../data/*.csv /Desktop/School/Coding/CS166/projectPart3/phase3/code/data.
 
 echo "Initializing tables .. "
 sleep 1

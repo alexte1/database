@@ -174,6 +174,23 @@ public class MechanicShop{
 		stmt.close ();
 		return rowCount;
 	}
+
+	public int executeQuery2 (String query) throws SQLException {
+		//creates a statement object
+		Statement stmt = this._connection.createStatement ();
+
+		//issues the query instruction
+		ResultSet rs = stmt.executeQuery (query);
+
+		int rowCount = 0;
+
+		//iterates through the result set and count nuber of results.
+		while(rs.next()){
+			rowCount++;
+		}//end while
+		stmt.close ();
+		return rowCount;
+	}
 	
 	/**
 	 * Method to fetch the last value from sequence. This
@@ -321,14 +338,15 @@ try{
 */
    	public static int getID(MechanicShop esql){
    		try{
-   			String query = "SELECT UNIQUE COUNT(id) FROM Customer";
-   			int totalID = esql.executeQuery(query);
-   			System.out.println("Total number of unique ids - " + totalID);
+   			String query = "SELECT * FROM Customer";
+   			int totalID = esql.executeQuery2(query);
+   			System.out.println("Total number of unique ids : " + totalID);
    			// Add + 1 because we want to have the customer to have a new unique
    			// customer id
-   			return totalID + 1;
+   			return totalID;
    		} catch (Exception e){
    			System.err.println(e.getMessage());
+   			return -912833;
    		}
    	}
 
@@ -338,6 +356,8 @@ try{
 
 			//To get the largest id to make sure each customer is uniue.
 			query = query + getID(esql) + "','";
+
+			// System.out.println(tmp);
 
 			System.out.println("First Name - ");
 			String fname = in.readLine();
