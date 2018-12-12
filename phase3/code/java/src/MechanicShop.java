@@ -24,6 +24,15 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 
+/*
+For generating a random number for the functions
+	1. Add Customer.
+	2. Add Mechanic.
+*/
+import java.util.Random;
+
+import java.lang.Math;
+
 /**
  * This class defines a simple embedded SQL utility class that is designed to
  * work with PostgreSQL JDBC drivers.
@@ -51,7 +60,7 @@ public class MechanicShop{
 	        System.exit(-1);
 		}
 	}
-	
+
 	/**
 	 * Method to execute an update SQL statement.  Update SQL instructions
 	 * includes CREATE, INSERT, UPDATE, DELETE, and DROP.
@@ -129,7 +138,7 @@ public class MechanicShop{
 		//issues the query instruction 
 		ResultSet rs = stmt.executeQuery (query); 
 	 
-		/*
+		/*`
 		 * obtains the metadata object for the returned result set.  The metadata 
 		 * contains row and column info. 
 		*/ 
@@ -174,7 +183,6 @@ public class MechanicShop{
 		stmt.close ();
 		return rowCount;
 	}
-
 	public int executeQuery2 (String query) throws SQLException {
 		//creates a statement object
 		Statement stmt = this._connection.createStatement ();
@@ -191,6 +199,38 @@ public class MechanicShop{
 		stmt.close ();
 		return rowCount;
 	}
+	public int executeQuery3 (String query) throws SQLException {
+		Statement stmt = this._connection.createStatement ();
+
+		//issues the query instruction
+		ResultSet rs = stmt.executeQuery (query);
+		/*
+		 ** obtains the metadata object for the returned result set.  The metadata
+		 ** contains row and column info.
+		 */
+		ResultSetMetaData rsmd = rs.getMetaData ();
+    int numCol = rsmd.getColumnCount ();
+		int rowCount = 0;
+
+		// iterates through the result set and output them to standard out.
+		boolean outputHeader = true;
+		while (rs.next()){
+			if(outputHeader){
+				for(int i = 1; i <= numCol; i++){
+					System.out.print(rsmd.getColumnName(i) + "\t");
+				}
+				System.out.println();
+				outputHeader = false;
+			}
+ 	 	  for (int i=1; i<=numCol; ++i)
+				System.out.print (rs.getString (i) + "\t");
+			System.out.println ();
+			++rowCount;
+		}
+		stmt.close();
+		return rowCount;
+	}
+	
 	
 	/**
 	 * Method to fetch the last value from sequence. This
@@ -321,78 +361,182 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 
-/*
-try{
-         String query = "SELECT * FROM Catalog WHERE cost < ";
-         System.out.print("\tEnter cost: $");
-         String input = in.readLine();
-         query += input;
+	public static int getRandNum(){
 
-         int rowCount = esql.executeQuery(query);
-         System.out.println ("total row(s): " + rowCount);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
-      }
-   }//end QueryExample
+		int upperBound = (int) Math.pow(2, 32) - 1;
+		Random rand = new Random();
+		int n = (int) (Math.random() * upperBound);
 
-*/
-   	public static int getID(MechanicShop esql){
-   		try{
-   			String query = "SELECT * FROM Customer";
-   			int totalID = esql.executeQuery2(query);
-   			System.out.println("Total number of unique ids : " + totalID);
-   			// Add + 1 because we want to have the customer to have a new unique
-   			// customer id
-   			return totalID;
-   		} catch (Exception e){
-   			System.err.println(e.getMessage());
-   			return -912833;
-   		}
-   	}
+		return n;
+	}
+	
+	public static int getCID(MechanicShop esql){
+		try{
+
+			boolean flag = true;
+
+			while (flag) {
+
+				String query = "Select id FROM Customer WHERE id = ";
+
+				int randNum = getRandNum();
+
+				query += randNum + ";";
+
+				int rowCount = esql.executeQuery2(query);
+
+				if(rowCount == 0){
+					System.out.println("Worked");
+					System.out.println(randNum);
+					flag = false;
+					return randNum;//add 1 later
+				} else{
+					System.out.println("FAiled");
+				}
+			}
+
+			return -99999;
+
+				// return totalID;//add 1 later
+		} catch(Exception e){
+				System.err.println(e.getMessage());
+				return -912833;
+		}
+	}
+
+	public static int getMID(MechanicShop esql){
+		try{
+				//String query = "SELECT COUNT(DISTINCT id) FROM Customer;";
+				// String query = "SELECT * FROM Customer";
+			 //  	int totalID = esql.executeQuery2(query);
+				// System.out.println("Total number of distinct ids: " + totalID);
+			boolean flag = true;
+
+			while (flag) {
+
+				String query = "Select id FROM Mechanic WHERE id = ";
+
+				int randNum = getRandNum();
+
+				query += randNum + ";";
+
+				int rowCount = esql.executeQuery2(query);
+
+				if(rowCount == 0){
+					System.out.println("Worked");
+					System.out.println(randNum);
+					flag = false;
+					return randNum;//add 1 later
+				} else{
+					System.out.println("FAiled");
+				}
+			}
+
+			return -99999;
+
+				// return totalID;//add 1 later
+		} catch(Exception e){
+				System.err.println(e.getMessage());
+				return -912833;
+		}
+	}
 
 	public static void AddCustomer(MechanicShop esql){//1
-		try{
-			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES('";
 
-			//To get the largest id to make sure each customer is uniue.
-			query = query + getID(esql) + "','";
+		try {
+				String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES('";
 
-			// System.out.println(tmp);
+				int value = getCID(esql);
 
-			System.out.println("First Name - ");
-			String fname = in.readLine();
-			query = query + fname + "','";
+				query += value + "','";
 
-			System.out.println("Last Name - ");
-			String lname = in.readLine();
-			query = query + lname + "','";
+				System.out.println("First Name: ");
+				String fname = in.readLine();
+				query += fname + "','";
 
-			System.out.println("Phone # - ");
-			String phone = in.readLine();
-			query = query + phone + "','";
+				System.out.println("Last Name: ");
+				String lname = in.readLine();
+				query += lname + "','";
 
-			System.out.println("Address - ");
-			String address = in.readLine();
-			query = query + address + "');";
+				System.out.println("Phone #: ");
+				String phone = in.readLine();
+				query += phone + "','";
 
-			//Execture the query via esql
-			esql.executeQuery(query);
+				System.out.println("Address: ");
+				String address = in.readLine();
+				query += address + "');";
+
+				System.out.println(query);
+				// System.out.println("Insterted" + value);
+				// esql.executeQuery(query);
+
+				// MechanicShop a = new MechanicShop(Alex_DB, 9998, Alex, );
+
+				int x = esql.executeQueryAndPrintResult(query);
+				System.out.println(x);
 		} catch (Exception e){
-			System.err.println(e.getMessage());
+				System.err.println(e.getMessage());
 		}
-
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
-		
+		try {
+				String query = "INSERT INTO Mechanic(id, fname, lname, experience) VALUES('";
+				query += getMID(esql) + "','";
+
+				System.out.println("First Name: ");
+				String fname = in.readLine();
+				query += fname + "','";
+
+				System.out.println("Last Name: ");
+				String lname = in.readLine();
+				query += lname + "','";
+
+				System.out.println("Experience Years: ");
+				String experience = in.readLine();
+				query += experience + "');";
+
+				esql.executeQuery(query);
+		} catch (Exception e){
+				System.err.println(e.getMessage());
+		}
+			
 	}
 	
 	public static void AddCar(MechanicShop esql){//3
+		try {
+				String query = "INSERT INTO Car(vin, make, model, year) VALUES('";
+
+				System.out.println("VIN: ");
+				String vin = in.readLine();
+				query += vin + "','";
+
+				System.out.println("Make: ");
+				String make = in.readLine();
+				query += make + "','";
+
+				System.out.println("Model: ");
+				String model = in.readLine();
+				query += model + "','";
+
+				System.out.println("Year: ");
+				String year = in.readLine();
+				query += year + "');";
+
+				esql.executeQuery(query);
+		} catch (Exception e){
+				System.err.println(e.getMessage());
+		}
 		
 	}
 	
 	public static void InsertServiceRequest(MechanicShop esql){//4
-		
+		try{
+			//String query = ;
+		}
+		catch(Exception e){
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	public static void CloseServiceRequest(MechanicShop esql) throws Exception{//5
@@ -400,25 +544,63 @@ try{
 	}
 	
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
-		
+		try{
+			String query = "SELECT date,comment,bill FROM Closed_Request WHERE bill < 100;";
+			int rowCount = esql.executeQuery3(query);
+			System.out.println("total row(s): " + rowCount);
+		}
+	 	catch(Exception e){
+			System.err.println(e.getMessage());
+		}	
 	}
 	
 	public static void ListCustomersWithMoreThan20Cars(MechanicShop esql){//7
-		
+		try{
+			String query = "SELECT fname,lname FROM Customer AS C, (SELECT customer_id, COUNT(customer_id) AS cnt FROM Owns GROUP BY customer_id HAVING COUNT(customer_id) > 20) AS N WHERE N.customer_id=C.id;";
+			int rowCount = esql.executeQuery3(query);
+			System.out.println("total row(s): " + rowCount);
+		}
+	 	catch(Exception e){
+			System.err.println(e.getMessage());
+		}	
 	}
 	
 	public static void ListCarsBefore1995With50000Milles(MechanicShop esql){//8
-		
+		try{
+			String query = "SELECT DISTINCT make, model, year FROM Car AS C, Service_Request AS S WHERE year < 1995 and S.car_vin = C.vin and S.odometer < 50000;";
+			int rowCount = esql.executeQuery3(query);
+			System.out.println("total row(s): " + rowCount);
+		}
+	 	catch(Exception e){
+			System.err.println(e.getMessage());
+		}	
 	}
 	
 	public static void ListKCarsWithTheMostServices(MechanicShop esql){//9
-		//
-		
+		try{
+			String query = "SELECT make, model, S.num FROM Car AS C, (SELECT car_vin, COUNT(rid) AS num FROM Service_Request GROUP BY car_vin ) AS S WHERE S.car_vin = C.vin ORDER BY S.num DESC LIMIT ";
+			
+			System.out.println("First Number of Cars to List(>0): ");
+			String num = in.readLine();
+			query += num + ";";
+
+			int rowCount = esql.executeQuery3(query);
+			System.out.println("total row(s): " + rowCount);
+		}
+	 	catch(Exception e){
+			System.err.println(e.getMessage());
+		}	
 	}
 	
 	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//9
-		//
-		
+		try{
+			String query = "SELECT C.fname, C.lname, total FROM Customer AS C,(SELECT SR.customer_id, SUM(CR.bill) AS total FROM Closed_Request AS CR, Service_Request AS SR WHERE CR.rid = SR.rid GROUP BY SR.customer_id) AS B WHERE C.id=B.customer_id ORDER BY B.total DESC;";
+			int rowCount = esql.executeQuery3(query);
+			System.out.println("total row(s): " + rowCount);
+		}
+	 	catch(Exception e){
+			System.err.println(e.getMessage());
+		}	
 	}
 	
-}
+}//end of Mechanic shop class
